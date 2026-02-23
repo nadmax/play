@@ -1,0 +1,5 @@
+README.md
+.env.example
+.git
+.python-version
+*!.env
