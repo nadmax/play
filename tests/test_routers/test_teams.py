@@ -1,9 +1,9 @@
 import pytest
-from app.models import Company, Team
+from app import models
 
 
 def make_company(db, name="Nintendo", country="Japan"):
-    company = Company(name=name, country=country)
+    company = models.Company(name=name, country=country)
     db.add(company)
     db.commit()
     db.refresh(company)
@@ -11,7 +11,7 @@ def make_company(db, name="Nintendo", country="Japan"):
 
 
 def make_team(db, company_id, name="Mario Team", specialty="Development"):
-    team = Team(name=name, specialty=specialty, company_id=company_id)
+    team = models.Team(name=name, specialty=specialty, company_id=company_id)
     db.add(team)
     db.commit()
     db.refresh(team)
