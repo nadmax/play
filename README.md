@@ -1,4 +1,4 @@
-![CI](https://github.com/nadmax/play/actions/workflows/ci.yaml/badge.svg) ![CD](https://github.com/nadmax/play/actions/workflows/cd.yaml/badge.svg)
+![CI](https://github.com/nadmax/play/actions/workflows/ci.yaml/badge.svg) ![CD](https://github.com/nadmax/play/actions/workflows/cd.yaml/badge.svg) [![codecov](https://codecov.io/gh/nadmax/play/graph/badge.svg)](https://codecov.io/gh/nadmax/play)
 
 # Play
 
