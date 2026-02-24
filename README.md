@@ -15,7 +15,7 @@ Play is an API that manages videogame companies with their teams.
 1. Clone the repository
 
 ```sh
-git clone https://github.com/your-username/play.git
+git clone https://github.com/nadmax/play.git
 cd play
 ```
 
