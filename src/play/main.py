@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from app.routers import companies, teams
+from play.routers import companies, teams
 
 
 @asynccontextmanager

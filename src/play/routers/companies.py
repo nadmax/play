@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy import orm
 
-from app import database, schemas
-from app.services import companies
+from play import database, schemas
+from play.services import companies
 
 router = APIRouter(prefix="/companies", tags=["companies"])
 

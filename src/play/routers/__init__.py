@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.routers import companies, teams
+from play.routers import companies, teams
 
 router = APIRouter()
 

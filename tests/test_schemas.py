@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app import schemas
+from play import schemas
 
 
 def test_company_create_valid():

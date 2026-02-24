@@ -1,8 +1,8 @@
 from sqlalchemy import orm
 from fastapi import HTTPException, status
 
-from app import models
-from app import schemas
+from play import models
+from play import schemas
 
 
 def list_teams(db: orm.Session, skip: int = 0, limit: int = 100):

@@ -1,4 +1,4 @@
-from app import models
+from play import models
 
 
 def make_company(db, name="Nintendo", country="Japan", founded_year=None):
@@ -83,10 +83,10 @@ def test_delete_company_not_found(client):
 
 
 def test_get_company_teams(client, db):
-    from app.models import Team
-
     company = make_company(db, name="FromSoftware")
-    team = Team(name="Soulsborne Team", specialty="Development", company_id=company.id)
+    team = models.Team(
+        name="Soulsborne Team", specialty="Development", company_id=company.id
+    )
     db.add(team)
     db.commit()
     response = client.get(f"/companies/{company.id}/teams")

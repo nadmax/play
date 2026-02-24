@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, orm
-from app import const
+from play import const
 
 engine = create_engine(const.DATABASE_URL)
 SessionLocal = orm.sessionmaker(autocommit=False, autoflush=False, bind=engine)
