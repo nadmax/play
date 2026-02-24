@@ -1,7 +1,38 @@
+from app.models import Company
+
+
+def make_company(db, name="Nintendo", country="Japan", founded_year=None):
+    company = Company(name=name, country=country, founded_year=founded_year)
+    db.add(company)
+    db.commit()
+    db.refresh(company)
+    return company
+
+
 def test_list_companies_empty(client):
     response = client.get("/companies/")
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_list_companies(client, db):
+    make_company(db, name="Nintendo")
+    make_company(db, name="Ubisoft", country="France")
+    response = client.get("/companies/")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_get_company(client, db):
+    company = make_company(db, name="Ubisoft", country="France")
+    response = client.get(f"/companies/{company.id}")
+    assert response.status_code == 200
+    assert response.json()["name"] == "Ubisoft"
+
+
+def test_get_company_not_found(client):
+    response = client.get("/companies/9999")
+    assert response.status_code == 404
 
 
 def test_create_company(client):
@@ -14,10 +45,9 @@ def test_create_company(client):
     assert data["id"] is not None
 
 
-def test_create_company_duplicate(client):
-    payload = {"name": "Nintendo", "country": "Japan"}
-    client.post("/companies/", json=payload)
-    response = client.post("/companies/", json=payload)
+def test_create_company_duplicate(client, db):
+    make_company(db, name="Nintendo")
+    response = client.post("/companies/", json={"name": "Nintendo", "country": "Japan"})
     assert response.status_code == 409
 
 
@@ -26,34 +56,10 @@ def test_create_company_missing_field(client):
     assert response.status_code == 422
 
 
-def test_get_company(client):
-    created = client.post(
-        "/companies/", json={"name": "Ubisoft", "country": "France"}
-    ).json()
-    response = client.get(f"/companies/{created['id']}")
-    assert response.status_code == 200
-    assert response.json()["name"] == "Ubisoft"
-
-
-def test_get_company_not_found(client):
-    response = client.get("/companies/9999")
-    assert response.status_code == 404
-
-
-def test_list_companies(client):
-    client.post("/companies/", json={"name": "Nintendo", "country": "Japan"})
-    client.post("/companies/", json={"name": "Ubisoft", "country": "France"})
-    response = client.get("/companies/")
-    assert response.status_code == 200
-    assert len(response.json()) == 2
-
-
-def test_update_company(client):
-    created = client.post(
-        "/companies/", json={"name": "CD Projekt", "country": "Poland"}
-    ).json()
+def test_update_company(client, db):
+    company = make_company(db, name="CD Projekt", country="Poland")
     response = client.patch(
-        f"/companies/{created['id']}", json={"country": "Poland", "founded_year": 1994}
+        f"/companies/{company.id}", json={"country": "Poland", "founded_year": 1994}
     )
     assert response.status_code == 200
     assert response.json()["founded_year"] == 1994
@@ -64,13 +70,11 @@ def test_update_company_not_found(client):
     assert response.status_code == 404
 
 
-def test_delete_company(client):
-    created = client.post(
-        "/companies/", json={"name": "Valve", "country": "USA"}
-    ).json()
-    response = client.delete(f"/companies/{created['id']}")
+def test_delete_company(client, db):
+    company = make_company(db, name="Valve", country="USA")
+    response = client.delete(f"/companies/{company.id}")
     assert response.status_code == 204
-    assert client.get(f"/companies/{created['id']}").status_code == 404
+    assert client.get(f"/companies/{company.id}").status_code == 404
 
 
 def test_delete_company_not_found(client):
@@ -78,19 +82,14 @@ def test_delete_company_not_found(client):
     assert response.status_code == 404
 
 
-def test_get_company_teams(client):
-    company = client.post(
-        "/companies/", json={"name": "FromSoftware", "country": "Japan"}
-    ).json()
-    client.post(
-        "/teams/",
-        json={
-            "name": "Soulsborne Team",
-            "specialty": "Development",
-            "company_id": company["id"],
-        },
-    )
-    response = client.get(f"/companies/{company['id']}/teams")
+def test_get_company_teams(client, db):
+    from app.models import Team
+
+    company = make_company(db, name="FromSoftware")
+    team = Team(name="Soulsborne Team", specialty="Development", company_id=company.id)
+    db.add(team)
+    db.commit()
+    response = client.get(f"/companies/{company.id}/teams")
     assert response.status_code == 200
     assert len(response.json()["teams"]) == 1
 
