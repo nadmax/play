@@ -38,6 +38,24 @@ To explore and test all available endpoints interactively, open [http://localhos
 
 The database is automatically created and seeded with real videogame companies and their teams on first startup.
 
+## Environment variables
+
+### Database
+
+| Variable | Description | Default |
+|---|---|---|
+| `POSTGRES_USER` | PostgreSQL username | - |
+| `POSTGRES_HOST` | PostgreSQL host | `db` |
+| `POSTGRES_PORT` | PostgreSQL port | `5432` |
+| `POSTGRES_PASSWORD` | PostgreSQL password | - |
+| `POSTGRES_DB` | PostgreSQL database name | - |
+
+### API
+
+| Variable | Description | Default |
+|---|---|---|
+| `API_PORT` | Port the API listens on | `8080` |
+
 ## Links
 
 - [Python](https://www.python.org/)
