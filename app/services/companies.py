@@ -1,16 +1,16 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import orm
 from fastapi import HTTPException, status
 
-from app.models import Company
-from app.schemas import CompanyCreate, CompanyUpdate
+from app import models
+from app import schemas
 
 
-def list_companies(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Company).offset(skip).limit(limit).all()
+def list_companies(db: orm.Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Company).offset(skip).limit(limit).all()
 
 
-def get_company(db: Session, company_id: int):
-    company = db.query(Company).filter(Company.id == company_id).first()
+def get_company(db: orm.Session, company_id: int):
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
     if not company:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Company not found"
@@ -18,20 +18,22 @@ def get_company(db: Session, company_id: int):
     return company
 
 
-def create_company(db: Session, payload: CompanyCreate):
-    existing = db.query(Company).filter(Company.name == payload.name).first()
+def create_company(db: orm.Session, payload: schemas.CompanyCreate):
+    existing = (
+        db.query(models.Company).filter(models.Company.name == payload.name).first()
+    )
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Company already exists"
         )
-    company = Company(**payload.model_dump())
+    company = models.Company(**payload.model_dump())
     db.add(company)
     db.commit()
     db.refresh(company)
     return company
 
 
-def update_company(db: Session, company_id: int, payload: CompanyUpdate):
+def update_company(db: orm.Session, company_id: int, payload: schemas.CompanyUpdate):
     company = get_company(db, company_id)
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(company, field, value)
@@ -40,7 +42,7 @@ def update_company(db: Session, company_id: int, payload: CompanyUpdate):
     return company
 
 
-def delete_company(db: Session, company_id: int):
+def delete_company(db: orm.Session, company_id: int):
     company = get_company(db, company_id)
     db.delete(company)
     db.commit()

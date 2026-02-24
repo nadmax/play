@@ -1,8 +1,8 @@
-from app.models import Company
+from app import models
 
 
 def make_company(db, name="Nintendo", country="Japan", founded_year=None):
-    company = Company(name=name, country=country, founded_year=founded_year)
+    company = models.Company(name=name, country=country, founded_year=founded_year)
     db.add(company)
     db.commit()
     db.refresh(company)
