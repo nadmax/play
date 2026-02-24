@@ -3,10 +3,6 @@ name: CD
 on:
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_OWNER: nadmax
-
 jobs:
   push:
     name: Build & Push to GHCR
@@ -25,11 +21,8 @@ jobs:
         id: meta
         run: |
           git fetch --tags
-
           GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-          TAG=${GIT_TAG#v}
-
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "tag=${GIT_TAG#v}" >> $GITHUB_OUTPUT
           echo "Image will be tagged as: ${TAG}"
 
       - name: Log in to GitHub Container Registry
@@ -39,15 +32,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/play:${{ steps.meta.outputs.tag }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/play:latest
-          cache-from: type=gha,scope=play
-          cache-to: type=gha,mode=max,scope=play
-          provenance: false
+      - name: Retag and push Docker image
+        run: |
+          docker buildx imagetools create \
+            --tag ghcr.io/nadmax/play:${{ steps.meta.outputs.tag }} \
+            --tag ghcr.io/nadmax/play:latest \
+            ghcr.io/nadmax/play:${{ github.sha }}
