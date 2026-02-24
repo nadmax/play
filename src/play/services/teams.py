@@ -1,4 +1,4 @@
-from sqlalchemy import orm
+from sqlalchemy import orm, exc
 from fastapi import HTTPException, status
 
 from play import models
@@ -27,23 +27,38 @@ def _check_company_exists(db: orm.Session, company_id: int):
 
 
 def create_team(db: orm.Session, payload: schemas.TeamCreate):
-    _check_company_exists(db, payload.company_id)
-    team = models.Team(**payload.model_dump())
-    db.add(team)
-    db.commit()
-    db.refresh(team)
-    return team
+    try:
+        team = models.Team(**payload.model_dump())
+        db.add(team)
+        db.commit()
+        db.refresh(team)
+        return team
+    except exc.IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=404, detail="Company not found")
 
 
 def update_team(db: orm.Session, team_id: int, payload: schemas.TeamUpdate):
-    team = get_team(db, team_id)
-    _check_company_exists(db, payload.company_id)
-    data = payload.model_dump(exclude_unset=True)
-    for field, value in data.items():
-        setattr(team, field, value)
-    db.commit()
-    db.refresh(team)
-    return team
+    try:
+        team = (
+            db.query(models.Team)
+            .filter(models.Team.id == team_id)
+            .with_for_update()
+            .first()
+        )
+        if not team:
+            raise HTTPException(status_code=404, detail="Team not found")
+
+        data = payload.model_dump(exclude_unset=True)
+        for field, value in data.items():
+            setattr(team, field, value)
+
+        db.commit()
+        db.refresh(team)
+        return team
+    except exc.IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=404, detail="Company not found")
 
 
 def delete_team(db: orm.Session, team_id: int):

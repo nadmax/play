@@ -1,4 +1,4 @@
-from sqlalchemy import orm
+from sqlalchemy import orm, exc
 from fastapi import HTTPException, status
 
 from play import models
@@ -19,18 +19,17 @@ def get_company(db: orm.Session, company_id: int):
 
 
 def create_company(db: orm.Session, payload: schemas.CompanyCreate):
-    existing = (
-        db.query(models.Company).filter(models.Company.name == payload.name).first()
-    )
-    if existing:
+    try:
+        company = models.Company(**payload.model_dump())
+        db.add(company)
+        db.commit()
+        db.refresh(company)
+        return company
+    except exc.IntegrityError:
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Company already exists"
         )
-    company = models.Company(**payload.model_dump())
-    db.add(company)
-    db.commit()
-    db.refresh(company)
-    return company
 
 
 def update_company(db: orm.Session, company_id: int, payload: schemas.CompanyUpdate):

@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import orm
-
 from play import database, schemas
 from play.services import teams
 
@@ -9,7 +8,9 @@ router = APIRouter(prefix="/teams", tags=["teams"])
 
 @router.get("/", response_model=list[schemas.TeamResponse])
 def list_teams(
-    skip: int = 0, limit: int = 100, db: orm.Session = Depends(database.get_db)
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: orm.Session = Depends(database.get_db),
 ):
     return teams.list_teams(db, skip, limit)
 
@@ -40,3 +41,4 @@ def update_team(
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_team(team_id: int, db: orm.Session = Depends(database.get_db)):
     teams.delete_team(db, team_id)
+

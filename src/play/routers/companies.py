@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import orm
-
 from play import database, schemas
 from play.services import companies
 
@@ -9,13 +8,20 @@ router = APIRouter(prefix="/companies", tags=["companies"])
 
 @router.get("/", response_model=list[schemas.CompanyResponse])
 def list_companies(
-    skip: int = 0, limit: int = 100, db: orm.Session = Depends(database.get_db)
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
+    db: orm.Session = Depends(database.get_db),
 ):
     return companies.list_companies(db, skip, limit)
 
 
-@router.get("/{company_id}", response_model=schemas.CompanyWithTeams)
+@router.get("/{company_id}", response_model=schemas.CompanyResponse)
 def get_company(company_id: int, db: orm.Session = Depends(database.get_db)):
+    return companies.get_company(db, company_id)
+
+
+@router.get("/{company_id}/teams", response_model=schemas.CompanyWithTeams)
+def get_company_teams(company_id: int, db: orm.Session = Depends(database.get_db)):
     return companies.get_company(db, company_id)
 
 
@@ -40,8 +46,3 @@ def update_company(
 @router.delete("/{company_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_company(company_id: int, db: orm.Session = Depends(database.get_db)):
     companies.delete_company(db, company_id)
-
-
-@router.get("/{company_id}/teams", response_model=schemas.CompanyWithTeams)
-def get_company_teams(company_id: int, db: orm.Session = Depends(database.get_db)):
-    return companies.get_company(db, company_id)

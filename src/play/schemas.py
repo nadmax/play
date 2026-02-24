@@ -1,12 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, HttpUrl, Field
 
 
 class CompanyBase(BaseModel):
-    name: str
-    country: str
-    founded_year: int | None = None
-    website: str | None = None
-    description: str | None = None
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=255)
+    country: str = Field(min_length=2, max_length=100)
+    founded_year: int | None = Field(default=None, ge=1800, le=2100)
+    website: HttpUrl | None = None
+    description: str | None = Field(default=None, max_length=5000)
 
 
 class CompanyCreate(CompanyBase):
@@ -14,30 +16,34 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyUpdate(BaseModel):
-    name: str | None = None
-    country: str | None = None
-    founded_year: int | None = None
-    website: str | None = None
-    description: str | None = None
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    country: str | None = Field(default=None, min_length=2, max_length=100)
+    founded_year: int | None = Field(default=None, ge=1800, le=2100)
+    website: HttpUrl | None = None
+    description: str | None = Field(default=None, max_length=5000)
 
 
 class CompanyResponse(CompanyBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
 
-    model_config = {"from_attributes": True}
+    id: int
 
 
 class CompanyWithTeams(CompanyResponse):
-    teams: list["TeamResponse"] = []
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
 
-    model_config = {"from_attributes": True}
+    teams: list["TeamResponse"] = []
 
 
 class TeamBase(BaseModel):
-    name: str
-    specialty: str
-    size: int | None = None
-    description: str | None = None
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=255)
+    specialty: str = Field(min_length=1, max_length=100)
+    size: int | None = Field(default=None, ge=1, le=100000)
+    description: str | None = Field(default=None, max_length=5000)
     company_id: int
 
 
@@ -46,14 +52,17 @@ class TeamCreate(TeamBase):
 
 
 class TeamUpdate(BaseModel):
-    name: str | None = None
-    specialty: str | None = None
-    size: int | None = None
-    description: str | None = None
-    company_id: int
+    model_config = ConfigDict(extra="forbid")
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    specialty: str | None = Field(default=None, min_length=1, max_length=100)
+    size: int | None = Field(default=None, ge=1, le=100000)
+    description: str | None = Field(default=None, max_length=5000)
+    company_id: int | None = None  # ← bug fix
 
 
 class TeamResponse(TeamBase):
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
+
     id: int
 
-    model_config = {"from_attributes": True}
