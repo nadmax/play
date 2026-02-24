@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from sqlalchemy import orm
-from app import database
+from play import database
 
 
 class Company(database.Base):

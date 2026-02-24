@@ -1,5 +1,5 @@
 import pytest
-from app import models
+from play import models
 
 
 def make_company(db, name="Nintendo", country="Japan"):

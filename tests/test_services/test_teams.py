@@ -1,8 +1,8 @@
 import pytest
 from fastapi import HTTPException
 
-from app import models, schemas
-from app.services import teams
+from play import models, schemas
+from play.services import teams
 
 
 def make_company(db, name="Nintendo"):

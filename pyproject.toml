@@ -3,6 +3,7 @@ name = "play"
 version = "0.1.0"
 description = "An API to manage videogame companies with their teams."
 requires-python = ">=3.14"
+classifiers = ["Private :: Do Not Upload"]
 dependencies = [
     "fastapi>=0.131.0",
     "pydantic>=2.12.5",
@@ -24,3 +25,7 @@ dev = [
 
 [tool.uv]
 required-version = ">=0.10.4"
+
+[build-system]
+requires = ["uv_build>=0.10.4"]
+build-backend = "uv_build"
