@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.database import get_db
 from app.schemas import CompanyCreate, CompanyUpdate, CompanyResponse, CompanyWithTeams
@@ -9,7 +8,7 @@ from app.services import companies as service
 router = APIRouter(prefix="/companies", tags=["companies"])
 
 
-@router.get("/", response_model=List[CompanyResponse])
+@router.get("/", response_model=list[CompanyResponse])
 def list_companies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return service.list_companies(db, skip, limit)
 

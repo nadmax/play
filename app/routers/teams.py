@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.database import get_db
 from app.schemas import TeamCreate, TeamUpdate, TeamResponse
@@ -9,7 +8,7 @@ from app.services import teams as service
 router = APIRouter(prefix="/teams", tags=["teams"])
 
 
-@router.get("/", response_model=List[TeamResponse])
+@router.get("/", response_model=list[TeamResponse])
 def list_teams(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return service.list_teams(db, skip, limit)
 
@@ -32,4 +31,3 @@ def update_team(team_id: int, payload: TeamUpdate, db: Session = Depends(get_db)
 @router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_team(team_id: int, db: Session = Depends(get_db)):
     service.delete_team(db, team_id)
-
