@@ -37,9 +37,8 @@ def create_team(db: orm.Session, payload: schemas.TeamCreate):
 
 def update_team(db: orm.Session, team_id: int, payload: schemas.TeamUpdate):
     team = get_team(db, team_id)
+    _check_company_exists(db, payload.company_id)
     data = payload.model_dump(exclude_unset=True)
-    if "company_id" in data:
-        _check_company_exists(db, data["company_id"])
     for field, value in data.items():
         setattr(team, field, value)
     db.commit()

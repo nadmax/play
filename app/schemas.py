@@ -50,7 +50,7 @@ class TeamUpdate(BaseModel):
     specialty: str | None = None
     size: int | None = None
     description: str | None = None
-    company_id: int | None = None
+    company_id: int
 
 
 class TeamResponse(TeamBase):
