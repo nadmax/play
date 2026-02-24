@@ -80,7 +80,7 @@ def test_create_team_company_not_found(db):
 def test_update_team_success(db):
     company = make_company(db)
     team = make_team(db, company.id)
-    payload = schemas.TeamUpdate(name="DK Team")
+    payload = schemas.TeamUpdate(name="DK Team", company_id=company.id)
     result = teams.update_team(db, team.id, payload)
     assert result.name == "DK Team"
     assert result.company_id == company.id
@@ -106,7 +106,7 @@ def test_update_team_company_not_found(db):
 
 
 def test_update_team_not_found(db):
-    payload = schemas.TeamUpdate(name="Ghost")
+    payload = schemas.TeamUpdate(name="Ghost", company_id=999)
     with pytest.raises(HTTPException) as exc:
         teams.update_team(db, 999, payload)
     assert exc.value.status_code == 404

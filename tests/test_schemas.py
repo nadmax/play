@@ -102,14 +102,14 @@ def test_team_create_all_fields():
 
 
 def test_team_update_all_optional():
-    update = schemas.TeamUpdate()
+    update = schemas.TeamUpdate(company_id=1)
     assert update.name is None
     assert update.specialty is None
-    assert update.company_id is None
+    assert update.company_id == 1
 
 
 def test_team_update_partial():
-    update = schemas.TeamUpdate(name="Updated Team", size=150)
+    update = schemas.TeamUpdate(name="Updated Team", size=150, company_id=1)
     assert update.name == "Updated Team"
     assert update.size == 150
     assert update.specialty is None

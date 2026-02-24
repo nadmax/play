@@ -79,7 +79,9 @@ def test_create_team_missing_field(client, company):
 
 def test_update_team(client, db, company):
     team = make_team(db, company.id, name="NST", specialty="Studio")
-    response = client.patch(f"/teams/{team.id}", json={"size": 80})
+    response = client.patch(
+        f"/teams/{team.id}", json={"size": 80, "company_id": company.id}
+    )
     assert response.status_code == 200
     assert response.json()["size"] == 80
 
@@ -91,7 +93,7 @@ def test_update_team_company_not_found(client, db, company):
 
 
 def test_update_team_not_found(client):
-    response = client.patch("/teams/9999", json={"name": "Ghost"})
+    response = client.patch("/teams/9999", json={"name": "Ghost", "company_id": 9999})
     assert response.status_code == 404
 
 
