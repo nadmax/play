@@ -1,14 +1,13 @@
 from pydantic import BaseModel
-from typing import Optional, List
 from .team import TeamResponse
 
 
 class CompanyBase(BaseModel):
     name: str
     country: str
-    founded_year: Optional[int] = None
-    website: Optional[str] = None
-    description: Optional[str] = None
+    founded_year: int | None = None
+    website: str | None = None
+    description: str | None = None
 
 
 class CompanyCreate(CompanyBase):
@@ -16,11 +15,11 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyUpdate(BaseModel):
-    name: Optional[str] = None
-    country: Optional[str] = None
-    founded_year: Optional[int] = None
-    website: Optional[str] = None
-    description: Optional[str] = None
+    name: str | None = None
+    country: str | None = None
+    founded_year: int | None = None
+    website: str | None = None
+    description: str | None = None
 
 
 class CompanyResponse(CompanyBase):
@@ -30,9 +29,6 @@ class CompanyResponse(CompanyBase):
 
 
 class CompanyWithTeams(CompanyResponse):
-    teams: List["TeamResponse"] = []
+    teams: list["TeamResponse"] = []
 
     model_config = {"from_attributes": True}
-
-
-CompanyWithTeams.model_rebuild()
