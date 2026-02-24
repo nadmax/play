@@ -1,12 +1,11 @@
 from pydantic import BaseModel
-from typing import Optional
 
 
 class TeamBase(BaseModel):
     name: str
     specialty: str
-    size: Optional[int] = None
-    description: Optional[str] = None
+    size: int | None = None
+    description: str | None = None
     company_id: int
 
 
@@ -15,11 +14,11 @@ class TeamCreate(TeamBase):
 
 
 class TeamUpdate(BaseModel):
-    name: Optional[str] = None
-    specialty: Optional[str] = None
-    size: Optional[int] = None
-    description: Optional[str] = None
-    company_id: Optional[int] = None
+    name: str | None = None
+    specialty: str | None = None
+    size: int | None = None
+    description: str | None = None
+    company_id: int | None = None
 
 
 class TeamResponse(TeamBase):
