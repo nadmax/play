@@ -11,7 +11,7 @@ Schemas are organized by purpose:
 - Response: schema used for API responses
 """
 
-from pydantic import BaseModel, ConfigDict, HttpUrl, Field
+from pydantic import BaseModel, ConfigDict, HttpUrl, Field, field_validator
 
 
 class CompanyBase(BaseModel):
@@ -36,8 +36,15 @@ class CompanyBase(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     country: str = Field(min_length=2, max_length=100)
     founded_year: int | None = Field(default=None, ge=1800, le=2100)
-    website: HttpUrl | None = None
+    website: str | None = None
     description: str | None = Field(default=None, max_length=5000)
+
+    @field_validator("website", mode="before")
+    @classmethod
+    def validate_website(cls, v):
+        if v is None:
+            return v
+        return str(HttpUrl(v))
 
 
 class CompanyCreate(CompanyBase):
@@ -63,8 +70,15 @@ class CompanyUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     country: str | None = Field(default=None, min_length=2, max_length=100)
     founded_year: int | None = Field(default=None, ge=1800, le=2100)
-    website: HttpUrl | None = None
+    website: str | None = None
     description: str | None = Field(default=None, max_length=5000)
+
+    @field_validator("website", mode="before")
+    @classmethod
+    def validate_website(cls, v):
+        if v is None:
+            return v
+        return str(HttpUrl(v))
 
 
 class CompanyResponse(CompanyBase):

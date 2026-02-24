@@ -26,7 +26,7 @@ def test_company_create_all_fields():
         website="https://www.ubisoft.com",
         description="French video game publisher.",
     )
-    assert str(company.website).rstrip("/") == "https://www.ubisoft.com"
+    assert company.website == "https://www.ubisoft.com/"
     assert company.description == "French video game publisher."
 
 
