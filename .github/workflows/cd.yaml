@@ -5,7 +5,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  OWNER: nadmax
+  IMAGE_OWNER: nadmax
 
 jobs:
   push:
@@ -39,7 +39,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push ${{ matrix.component }} Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
