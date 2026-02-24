@@ -9,4 +9,4 @@ WORKDIR /app
 COPY --from=builder /app/.venv .venv
 COPY app/ app/
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+ENTRYPOINT ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${API_PORT:-8080}"]
