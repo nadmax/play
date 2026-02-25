@@ -5,8 +5,9 @@ This module initializes the FastAPI application, registers routers,
 and exposes a root health endpoint.
 """
 
+import typing
+from importlib import metadata
 from fastapi import FastAPI
-from pydantic import BaseModel
 from contextlib import asynccontextmanager
 from play.routers import companies, teams
 
@@ -27,7 +28,7 @@ app.include_router(companies.router)
 app.include_router(teams.router)
 
 
-class HealthResponse(BaseModel):
+class HealthResponse(typing.TypedDict):
     """
     Response schema for the root health endpoint.
 
@@ -42,8 +43,8 @@ class HealthResponse(BaseModel):
     docs: str
 
 
-@app.get("/", tags=["root"], response_model=HealthResponse)
-def root():
+@app.get("/", tags=["root"])
+def root() -> HealthResponse:
     """
     Root health endpoint.
 
@@ -53,4 +54,4 @@ def root():
     Returns:
         HealthResponse: API metadata information.
     """
-    return HealthResponse(name="Play API", version="1.0.0", docs="/docs")
+    return {"name": "Play API", "version": metadata.version("play"), "docs": "/docs"}
