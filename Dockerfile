@@ -10,5 +10,4 @@ FROM python:3.14-alpine AS final
 ENV PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
 COPY --from=builder /app/.venv .venv
-ENTRYPOINT ["uvicorn", "play.main:app", "--host", "0.0.0.0"]
-CMD ["--port", "8080"]
+ENTRYPOINT ["uvicorn", "play:app", "--host", "0.0.0.0", "--port", "8080"]
