@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from play.database import Base, get_db
-from play.main import app
+from play.__main__ import app
 
 SQLITE_URL = "sqlite:///./test.db"
 
