@@ -4,8 +4,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --no-dev --frozen --no-cache --no-install-project
 COPY src/ src/
-RUN uv build --wheel && \
-    uv pip install dist/*.whl
+RUN uv sync --no-dev --frozen --no-cache --no-editable
 
 FROM python:3.14-alpine AS final
 ENV PATH="/app/.venv/bin:$PATH"
