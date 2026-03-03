@@ -30,7 +30,7 @@ Edit `.env` with your own values.
 3. Start the project
 
 ```sh
-docker compose up -d --build
+docker compose up -d
 ```
 
 The API is available at [http://localhost:8080](http://localhost:8080).  
