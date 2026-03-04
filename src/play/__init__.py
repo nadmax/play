@@ -1,1 +1,1 @@
-from play.__main__ import app as app
+from play.main import app as app
