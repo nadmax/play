@@ -23,20 +23,33 @@ jobs:
           cache: true
           version: v0.69.1
 
-      - name: Scan Docker image with Trivy (SARIF report)
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: docker pull ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
+
+      - name: Save image as tar
+        run: docker save ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }} -o image.tar
+
+      - name: Scan (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
-          format: "sarif"
-          output: "trivy-scan-results.sarif"
+          input: image.tar
+          format: sarif
+          output: trivy-scan-results.sarif
           skip-setup-trivy: true
 
-      - name: Scan Docker image with Trivy (security gate)
+      - name: Scan (security gate)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
-          severity: "HIGH,CRITICAL"
-          format: "table"
+          input: image.tar
+          severity: HIGH,CRITICAL
+          format: table
           exit-code: "1"
           skip-setup-trivy: true
 
@@ -64,7 +77,12 @@ jobs:
         run: |
           git fetch --tags
           GIT_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-          echo "tag=${GIT_TAG#v}" >> $GITHUB_OUTPUT
+          if [ -z "$GIT_TAG" ]; then
+            echo "No tag found, skipping versioned push"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${GIT_TAG#v}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -74,6 +92,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Retag and push Docker image
+        if: steps.meta.outputs.skip != 'true'
         run: |
           docker buildx imagetools create \
             --tag ghcr.io/nadmax/play:${{ steps.meta.outputs.tag }} \
