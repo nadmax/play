@@ -12,14 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install Python with uv
-        run: uv python install 3.14
-
-      - name: Install dependencies
-        run: uv sync --no-install-project
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.14
 
       - name: Run Ruff
         run: uv run ruff check .
@@ -31,6 +27,18 @@ jobs:
     permissions:
       contents: read
       packages: write
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -45,33 +53,69 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile
-          push: ${{ github.ref == 'refs/heads/master' }}
+          load: true
+          push: false
           tags: ghcr.io/nadmax/play:${{ github.sha }}
           cache-from: type=gha,scope=play
           cache-to: type=gha,mode=max,scope=play
           provenance: false
 
+      - name: Run container
+        run: |
+          docker run -d --name play \
+            --network ${{ job.services.postgres.network }} \
+            -e POSTGRES_USER=test \
+            -e POSTGRES_PASSWORD=test \
+            -e POSTGRES_DB=test \
+            -e POSTGRES_HOST=postgres \
+            -e POSTGRES_PORT=5432 \
+            -p 8080:8080 \
+            ghcr.io/nadmax/play:${{ github.sha }}
+
+      - name: Wait for app to be ready
+        run: |
+          for i in $(seq 1 10); do
+            if curl -sf http://localhost:8080; then
+              echo "App is up"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 3s..."
+            sleep 3
+          done
+          docker logs play
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f play
+
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/master'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ghcr.io/nadmax/play:${{ github.sha }}
+          cache-from: type=gha,scope=play
+          provenance: false
+
   test:
     name: Test
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install Python with uv
-        run: uv python install 3.14
-
-      - name: Install dependencies
-        run: uv sync --no-install-project
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.14
 
       - name: Run test
         env:
@@ -93,14 +137,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Install Python with uv
-        run: uv python install 3.14
-
-      - name: Install dependencies
-        run: uv sync --no-install-project
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.14
 
       - name: Run Bandit
         run: uv run bandit -r src/play/
