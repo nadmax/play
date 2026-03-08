@@ -36,6 +36,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      packages: read
     steps:
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@v0.2.0
@@ -46,7 +47,7 @@ jobs:
       - name: Scan Docker Image (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          input: ghcr.io/nadmax/play:${{ github.sha }}
+          image-ref: ghcr.io/nadmax/play:${{ github.sha }}
           format: sarif
           output: trivy-scan-results.sarif
           skip-setup-trivy: true
@@ -54,7 +55,7 @@ jobs:
       - name: Scan Docker Image (Security Gate)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          input: ghcr.io/nadmax/play:${{ github.sha }}
+          image-ref: ghcr.io/nadmax/play:${{ github.sha }}
           severity: HIGH,CRITICAL
           format: table
           exit-code: "1"
