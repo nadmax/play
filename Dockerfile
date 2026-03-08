@@ -1,5 +1,6 @@
 FROM python:3.14-alpine AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.10.5 /uv /usr/local/bin/uv
+RUN apk upgrade --no-cache
 WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
@@ -14,6 +15,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.14-alpine AS final
 ENV PATH="/app/.venv/bin:$PATH"
+RUN apk upgrade --no-cache
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY --chown=appuser:appgroup --from=builder /app/.venv .venv
