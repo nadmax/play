@@ -1,10 +1,16 @@
 FROM python:3.14-alpine AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.10.5 /uv /usr/local/bin/uv
 WORKDIR /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --no-dev --frozen --no-install-project --no-editable
+
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-dev --frozen --no-cache --no-install-project
 COPY src/ src/
-RUN uv sync --no-dev --frozen --no-cache --no-editable
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-dev --frozen --no-editable
 
 FROM python:3.14-alpine AS final
 ENV PATH="/app/.venv/bin:$PATH"
