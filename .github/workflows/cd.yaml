@@ -1,18 +1,37 @@
 name: CD
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types:
-      - completed
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build \
+            -t ghcr.io/nadmax/play:${{ github.sha }} \
+            -f Dockerfile \
+            .
+          docker push ghcr.io/nadmax/play:${{ github.sha }}
+
   security:
     name: Security Scan
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       security-events: write
@@ -26,7 +45,7 @@ jobs:
       - name: Scan Docker Image (SARIF)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          input: ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
+          input: ghcr.io/nadmax/play:${{ github.sha }}
           format: sarif
           output: trivy-scan-results.sarif
           skip-setup-trivy: true
@@ -34,7 +53,7 @@ jobs:
       - name: Scan Docker Image (Security Gate)
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          input: ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
+          input: ghcr.io/nadmax/play:${{ github.sha }}
           severity: HIGH,CRITICAL
           format: table
           exit-code: "1"
@@ -56,8 +75,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Generate image metadata
         id: meta
@@ -84,4 +101,4 @@ jobs:
           docker buildx imagetools create \
             --tag ghcr.io/nadmax/play:${{ steps.meta.outputs.tag }} \
             --tag ghcr.io/nadmax/play:latest \
-            ghcr.io/nadmax/play:${{ github.event.workflow_run.head_sha }}
+            ghcr.io/nadmax/play:${{ github.sha }}
