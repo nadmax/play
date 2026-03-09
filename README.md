@@ -2,7 +2,7 @@
 
 # Play
 
-Play is an API that manages videogame companies with their teams.
+Play is an API built with FastAPI that manages video game companies.
 
 ## Getting started
 
@@ -55,6 +55,10 @@ The database is automatically created and seeded with real videogame companies a
 | Variable | Description | Default |
 |---|---|---|
 | `API_PORT` | Port the API listens on | `8080` |
+
+## Notes
+This project was originally created as part of a technical test.  
+The goal is to further develop the project in order to address software engineering issues.
 
 ## Links
 
