@@ -9,6 +9,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY pyproject.toml uv.lock ./
 COPY src/ src/
+COPY alembic/ alembic/
+COPY alembic.ini ./
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --no-dev --frozen --no-editable
@@ -19,5 +21,8 @@ RUN apk upgrade --no-cache
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY --chown=appuser:appgroup --from=builder /app/.venv .venv
+COPY --chown=appuser:appgroup --from=builder /app/src src/
+COPY --chown=appuser:appgroup --from=builder /app/alembic alembic/
+COPY --chown=appuser:appgroup --from=builder /app/alembic.ini .
 USER appuser
 ENTRYPOINT ["uvicorn", "play:app", "--host", "0.0.0.0", "--port", "8080"]
